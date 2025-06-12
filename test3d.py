@@ -54,12 +54,11 @@ for i in range(1, 5):
     cercha.set_restraints(i, True, True, True)
 
 cercha.set_load(10, fz=-10)
-cercha.set_load(11, fz=-10)
+cercha.set_load(11, fz=-10, fx=10, fy=10)
 
 cercha.solve()
-nodes, elements = cercha.print_results()
-nodes.to_excel('nodes.xlsx', index=True)
-elements.to_excel('elements.xlsx', index=True)
+cercha.print_results()
 cercha.plot_model(labels=True)
 cercha.plot_deformed(scale=1000, labels=True)
 cercha.plot_forces(0.05, labels=True)
+cercha.plot_reactions()

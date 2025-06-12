@@ -26,9 +26,8 @@ cercha.set_load(6, fy=-10)
 
 cercha.solve()
 nodes, elements = cercha.print_results()
-nodes.to_excel('nodes.xlsx', index=True)
-elements.to_excel('elements.xlsx', index=True)
 cercha.plot_model()
 cercha.plot_deformed(500)
 cercha.plot_forces(0.05)
+cercha.plot_reactions()
 

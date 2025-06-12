@@ -9,7 +9,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Amilcar',
     author_email='200190@unsaac.edu.pe',
-    url='https://github.com/amilcar/milcatrusspy.git',
+    url='https://github.com/Milca-py/milcatrusspy',
     install_requires=[
         'numpy',
         'pandas',
