@@ -75,6 +75,7 @@ class Model:
             plt.close()
             self.figure = plt.figure(figsize=(10, 8))
             self.ax = self.figure.add_subplot(111, projection='3d')
+            self.ax.set_title("Modelo", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if labels:
@@ -97,6 +98,7 @@ class Model:
         else:
             plt.close()
             self.figure, self.ax = plt.subplots(figsize=(10, 8))
+            self.ax.set_title("Modelo", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if labels:
@@ -120,6 +122,7 @@ class Model:
             plt.close()
             self.figure = plt.figure(figsize=(10, 8))
             self.ax = self.figure.add_subplot(111, projection='3d')
+            self.ax.set_title("Modelo deformado", fontsize=16, fontweight="bold", color="#0000FF")
             for node in self.nodes.values():
                 if node.restraints != (False, False, False):
                     self.ax.scatter(
@@ -148,6 +151,7 @@ class Model:
         else:
             plt.close()
             self.figure, self.ax = plt.subplots(figsize=(10, 8))
+            self.ax.set_title("Modelo deformado", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if labels:
@@ -170,12 +174,13 @@ class Model:
             self.__plot_ajuste_2d()
             plt.show()
 
-    def plot_forces(self, scale: float = 1, labels: bool = True) -> None:
+    def plot_axial_forces(self, scale: float = 1, labels: bool = True) -> None:
         if self.ndm == 3:
             from mpl_toolkits.mplot3d.art3d import Poly3DCollection
             plt.close()
             self.figure = plt.figure(figsize=(10, 8))
             self.ax = self.figure.add_subplot(111, projection='3d')
+            self.ax.set_title("Diagrama de Fuerzas Axiales", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if node.restraints != (False, False, False):
@@ -231,6 +236,7 @@ class Model:
         else:
             plt.close()
             self.figure, self.ax = plt.subplots(figsize=(10, 8))
+            self.ax.set_title("Diagrama de Fuerzas Axiales", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if node.restraints != (False, False):
@@ -279,6 +285,7 @@ class Model:
             plt.close()
             self.figure = plt.figure(figsize=(10, 8))
             self.ax = self.figure.add_subplot(111, projection='3d')
+            self.ax.set_title("Reacciones", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if node.restraints != (False, False, False):
@@ -297,11 +304,15 @@ class Model:
         else:
             plt.close()
             self.figure, self.ax = plt.subplots(figsize=(10, 8))
+            self.ax.set_title("Reacciones", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if node.restraints != (False, False):
                     self.ax.scatter(
                         node.coords[0], node.coords[1], marker='^', s=150, c='#762e99')
+                    reac = node.reactions
+                    txt = f"FX= {reac[0]:.2f}\nFY= {reac[1]:.2f}"
+                    self.ax.text(node.coords[0], node.coords[1], txt, fontsize=8, color="k", zorder=17, horizontalalignment="right", verticalalignment="bottom")
             for element in self.elements.values():
                 x = [element.node_i.coords[0], element.node_j.coords[0]]
                 y = [element.node_i.coords[1], element.node_j.coords[1]]

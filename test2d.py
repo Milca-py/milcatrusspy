@@ -25,9 +25,10 @@ cercha.set_restraints(2, True, True)
 cercha.set_load(6, fy=-10)
 
 cercha.solve()
-nodes, elements = cercha.print_results()
+nodes, elements = cercha.get_results()
+cercha.print_results()
 cercha.plot_model()
 cercha.plot_deformed(500)
-cercha.plot_forces(0.05)
+cercha.plot_axial_forces(0.05)
 cercha.plot_reactions()
 

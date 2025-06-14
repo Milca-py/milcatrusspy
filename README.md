@@ -17,6 +17,8 @@ pip install milcatrusspy
 - [x] Graficacion de la estructura (2D y 3D)
 - [x] Graficacion de la estructura deformada (2D y 3D)
 - [x] Graficacion de las fuerzas (2D y 3D)
+- [x] Graficacion de las reacciones (2D y 3D)
+- [x] Obtener resultados (2D y 3D)
 
 ## Comandos de uso en 2D
 
@@ -31,25 +33,25 @@ model = Model(ndm: int=2)
 Creacion de nodos
 
 ```python
-add_node(tag: int, x: float, y: float)
+model.add_node(tag: int, x: float, y: float)
 ```
 
 Creacion de elementos articulados (armadura)
 
 ```python
-add_element(tag: int, tag_node_i: int, tag_node_j: int, E: float, A: float)
+model.add_element(tag: int, tag_node_i: int, tag_node_j: int, E: float, A: float)
 ```
 
 Aplicacion de cargas
 
 ```python
-set_load(tag_node: int, fx: float, fy: float)
+model.set_load(tag_node: int, fx: float, fy: float)
 ```
 
 Aplicacion de restringimientos
 
 ```python
-set_restraints(tag_node: int, ux: bool, uy: bool)
+model.set_restraints(tag_node: int, ux: bool, uy: bool)
 ```
 
 Resolucion de la estructura
@@ -62,6 +64,12 @@ Impresion de resultados
 
 ```python
 model.print_results()
+```
+
+Obtener resultados
+
+```python
+nodes, elements = model.get_results()
 ```
 
 Graficacion de la estructura
@@ -79,7 +87,13 @@ model.plot_deformed(scale: float, labels: bool)
 Graficacion de las fuerzas
 
 ```python
-model.plot_forces(scale: float, labels: bool)
+model.plot_axial_forces(scale: float, labels: bool)
+```
+
+Graficacion de las reacciones
+
+```python
+model.plot_reactions()
 ```
 
 ### Ejemplo de uso en 2D
@@ -107,10 +121,12 @@ model.set_restraints(tag_node=1, ux=True, uy=True)
 model.set_restraints(tag_node=2, ux=True, uy=True)
 model.set_load(tag_node=6, fy=-10)
 model.solve()
+nodes, elements = model.get_results()
 model.print_results()
 model.plot_model(labels=True)
-model.plot_deformed(scale=1000, labels=True)
-model.plot_forces(scale=1000, labels=True)
+model.plot_deformed(scale=500, labels=False)
+model.plot_axial_forces(scale=0.05, labels=False)
+model.plot_reactions()
 ```
 
 ### Resultados del ploteo
@@ -132,25 +148,25 @@ model = Model(ndm: int=3)
 Creacion de nodos
 
 ```python
-add_node(tag: int, x: float, y: float, z: float)
+model.add_node(tag: int, x: float, y: float, z: float)
 ```
 
 Creacion de elementos articulados (armadura)
 
 ```python
-add_element(tag: int, tag_node_i: int, tag_node_j: int, E: float, A: float)
+model.add_element(tag: int, tag_node_i: int, tag_node_j: int, E: float, A: float)
 ```
 
 Aplicacion de cargas
 
 ```python
-set_load(tag_node: int, fx: float, fy: float, fz: float)
+model.set_load(tag_node: int, fx: float, fy: float, fz: float)
 ```
 
 Aplicacion de restringimientos
 
 ```python
-set_restraints(tag_node: int, ux: bool, uy: bool, uz: bool)
+model.set_restraints(tag_node: int, ux: bool, uy: bool, uz: bool)
 ```
 
 Resolucion de la estructura
@@ -163,6 +179,12 @@ Impresion de resultados
 
 ```python
 model.print_results()
+```
+
+Obtener resultados
+
+```python
+nodes, elements = model.get_results()
 ```
 
 Graficacion de la estructura
@@ -180,7 +202,13 @@ model.plot_deformed(scale: float, labels: bool)
 Graficacion de las fuerzas
 
 ```python
-model.plot_forces(scale: float, labels: bool)
+model.plot_axial_forces(scale: float, labels: bool)
+```
+
+Graficacion de las reacciones
+
+```python
+model.plot_reactions()
 ```
 
 ### Ejemplo de uso en 3D
@@ -245,10 +273,12 @@ cercha.set_load(10, fz=-10)
 cercha.set_load(11, fz=-10)
 
 cercha.solve()
+nodes, elements = cercha.get_results()
 cercha.print_results()
 cercha.plot_model(labels=True)
-cercha.plot_deformed(scale=1000, labels=True)
-cercha.plot_forces(0.05, labels=True)
+cercha.plot_deformed(scale=500, labels=False)
+cercha.plot_axial_forces(0.05, labels=False)
+cercha.plot_reactions()
 ```
 
 ### Resultados del ploteo
@@ -264,7 +294,9 @@ ploteo de las fuerzas (rojo: compresion, azul: traccion)
 ## Obtener Resultados
 
 ```python
-model.print_results()
+nodes, elements = model.get_results()
+
+model.print_results() # Imprime los resultados en la terminal
 ```
 
 esto imprimira los resultados en la terminal tanto de los nodos como de los elementos
