@@ -40,21 +40,9 @@ class Model:
             element.forces = element.kl @ element.displacements
         return displacements, reactions
 
-    def print_results(self) -> tuple[pd.DataFrame, pd.DataFrame]:
-        data_node = {}
-        for i in self.nodes.values():
-            data_node[f"Node {i.tag}"] = i.displacements
-        if self.ndm == 2:
-            df1 = pd.DataFrame(data_node, index=['UX', 'UY'])
-        else:
-            df1 = pd.DataFrame(data_node, index=['UX', 'UY', 'UZ'])
-        data_ele = {}
-        for i in self.elements.values():
-            estado = "Traccion" if i.forces[1] > 0 else "Compresion"
-            data_ele[f"Element {i.tag}"] = np.concatenate(
-                (i.displacements.round(6), i.forces.round(2), [estado], [i.length.round(2)]))
-        df2 = pd.DataFrame(
-            data_ele, index=['U1', 'U2', 'F1', 'F2', 'Estado', 'Longitud'])
+    def print_results(self) -> None:
+        df1, df2 = self.get_results()
+
         print("\n")
         print("Resultados")
         print("\n")
@@ -64,6 +52,22 @@ class Model:
         print("Resultados de los Elementos")
         print(df2)
         print("\n")
+
+    def get_results(self) -> tuple[pd.DataFrame, pd.DataFrame]:
+        data_node = {}
+        for i in self.nodes.values():
+            data_node[f"Node {i.tag}"] = np.concatenate((i.displacements, i.reactions))
+        if self.ndm == 2:
+            df1 = pd.DataFrame(data_node, index=['UX', 'UY', 'RX', 'RY'])
+        else:
+            df1 = pd.DataFrame(data_node, index=['UX', 'UY', 'UZ', 'RX', 'RY', 'RZ'])
+        data_ele = {}
+        for i in self.elements.values():
+            estado = "Traccion" if i.forces[1] > 0 else "Compresion"
+            data_ele[f"Element {i.tag}"] = np.concatenate(
+                (i.displacements.round(6), i.forces.round(2), [estado], [i.length.round(2)]))
+        df2 = pd.DataFrame(
+            data_ele, index=['U1', 'U2', 'F1', 'F2', 'Estado', 'Longitud'])
         return df1, df2
 
     def plot_model(self, labels: bool = True) -> None:
@@ -71,14 +75,16 @@ class Model:
             plt.close()
             self.figure = plt.figure(figsize=(10, 8))
             self.ax = self.figure.add_subplot(111, projection='3d')
+            self.ax.set_title("Modelo", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if labels:
                     self.ax.text(node.coords[0], node.coords[1], node.coords[2], str(
                         node.tag), color="#ff0000")
+                self.ax.scatter(node.coords[0], node.coords[1], node.coords[2], marker='o', s=20, c='#0000FF')
                 if node.restraints != (False, False, False):
                     self.ax.scatter(
-                        node.coords[0], node.coords[1], node.coords[2], marker='^', s=50, c='#762e99')
+                        node.coords[0], node.coords[1], node.coords[2], marker='^', s=100, c='#762e99')
             for element in self.elements.values():
                 x = [element.node_i.coords[0], element.node_j.coords[0]]
                 y = [element.node_i.coords[1], element.node_j.coords[1]]
@@ -86,20 +92,22 @@ class Model:
                 self.ax.plot(x, y, z, c='b')
                 if labels:
                     self.ax.text((x[0]+x[1])/2, (y[0]+y[1])/2, (z[0]+z[1])/2,
-                                 str(element.tag), fontproperties="italic", color="#7e2fa1")
+                                 str(element.tag), color="#7e2fa1" )#, fontproperties="italic")
             self.__plot_ajuste_3d()
             plt.show()
         else:
             plt.close()
             self.figure, self.ax = plt.subplots(figsize=(10, 8))
+            self.ax.set_title("Modelo", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if labels:
                     self.ax.text(node.coords[0], node.coords[1], str(
-                        node.tag), color="#ff0000")
+                        node.tag), color="#ff0000", zorder = 18)
+                self.ax.scatter(node.coords[0], node.coords[1], marker='o', s=20, c='#0000FF', zorder = 4)
                 if node.restraints != (False, False):
                     self.ax.scatter(
-                        node.coords[0], node.coords[1], marker='^', s=50, c='#762e99')
+                        node.coords[0], node.coords[1], marker='^', s=150, c='#762e99', zorder = 14)
             for element in self.elements.values():
                 x = [element.node_i.coords[0], element.node_j.coords[0]]
                 y = [element.node_i.coords[1], element.node_j.coords[1]]
@@ -114,6 +122,7 @@ class Model:
             plt.close()
             self.figure = plt.figure(figsize=(10, 8))
             self.ax = self.figure.add_subplot(111, projection='3d')
+            self.ax.set_title("Modelo deformado", fontsize=16, fontweight="bold", color="#0000FF")
             for node in self.nodes.values():
                 if node.restraints != (False, False, False):
                     self.ax.scatter(
@@ -142,6 +151,7 @@ class Model:
         else:
             plt.close()
             self.figure, self.ax = plt.subplots(figsize=(10, 8))
+            self.ax.set_title("Modelo deformado", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if labels:
@@ -164,12 +174,13 @@ class Model:
             self.__plot_ajuste_2d()
             plt.show()
 
-    def plot_forces(self, scale: float = 1, labels: bool = True) -> None:
+    def plot_axial_forces(self, scale: float = 1, labels: bool = True) -> None:
         if self.ndm == 3:
             from mpl_toolkits.mplot3d.art3d import Poly3DCollection
             plt.close()
             self.figure = plt.figure(figsize=(10, 8))
             self.ax = self.figure.add_subplot(111, projection='3d')
+            self.ax.set_title("Diagrama de Fuerzas Axiales", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if node.restraints != (False, False, False):
@@ -225,6 +236,7 @@ class Model:
         else:
             plt.close()
             self.figure, self.ax = plt.subplots(figsize=(10, 8))
+            self.ax.set_title("Diagrama de Fuerzas Axiales", fontsize=16, fontweight="bold", color="#0000FF")
             plt.tight_layout()
             for node in self.nodes.values():
                 if node.restraints != (False, False):
@@ -265,6 +277,46 @@ class Model:
                 x = [element.node_i.coords[0], element.node_j.coords[0]]
                 y = [element.node_i.coords[1], element.node_j.coords[1]]
                 self.ax.plot(x, y, c='b', zorder=6)
+            self.__plot_ajuste_2d()
+            plt.show()
+
+    def plot_reactions(self) -> None:
+        if self.ndm == 3:
+            plt.close()
+            self.figure = plt.figure(figsize=(10, 8))
+            self.ax = self.figure.add_subplot(111, projection='3d')
+            self.ax.set_title("Reacciones", fontsize=16, fontweight="bold", color="#0000FF")
+            plt.tight_layout()
+            for node in self.nodes.values():
+                if node.restraints != (False, False, False):
+                    self.ax.scatter(
+                        node.coords[0], node.coords[1], node.coords[2], marker='^', s=50, c='#762e99')
+                    reac = node.reactions
+                    txt = f"FX= {reac[0]:.2f}\nFY= {reac[1]:.2f}\nFZ= {reac[2]:.2f}"
+                    self.ax.text(node.coords[0], node.coords[1], node.coords[2], txt, fontsize=8, color="k", zorder=17, horizontalalignment="right", verticalalignment="bottom")
+            for element in self.elements.values():
+                x = [element.node_i.coords[0], element.node_j.coords[0]]
+                y = [element.node_i.coords[1], element.node_j.coords[1]]
+                z = [element.node_i.coords[2], element.node_j.coords[2]]
+                self.ax.plot(x, y, z, c='b')
+            self.__plot_ajuste_3d()
+            plt.show()
+        else:
+            plt.close()
+            self.figure, self.ax = plt.subplots(figsize=(10, 8))
+            self.ax.set_title("Reacciones", fontsize=16, fontweight="bold", color="#0000FF")
+            plt.tight_layout()
+            for node in self.nodes.values():
+                if node.restraints != (False, False):
+                    self.ax.scatter(
+                        node.coords[0], node.coords[1], marker='^', s=150, c='#762e99')
+                    reac = node.reactions
+                    txt = f"FX= {reac[0]:.2f}\nFY= {reac[1]:.2f}"
+                    self.ax.text(node.coords[0], node.coords[1], txt, fontsize=8, color="k", zorder=17, horizontalalignment="right", verticalalignment="bottom")
+            for element in self.elements.values():
+                x = [element.node_i.coords[0], element.node_j.coords[0]]
+                y = [element.node_i.coords[1], element.node_j.coords[1]]
+                self.ax.plot(x, y, c='b')
             self.__plot_ajuste_2d()
             plt.show()
 
